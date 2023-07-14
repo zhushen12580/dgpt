@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link Crawler</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+        
+        .container {
+            width: 600px;
+            padding: 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            resize: vertical;
+            padding: 5px;
+            font-family: monospace;
+        }
+        
+        .result {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-y: scroll;
+            max-height: 200px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Link Crawler</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.url.label }}<br>
+                <textarea name="url" rows="10" cols="50">{{ form.url.data }}</textarea>
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
+        {% if reviews %}
+            <h2>Results</h2>
+            <div class="result">
+                {{ reviews }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
