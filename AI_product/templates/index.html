@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Link Crawler</title>
+    <title>文锋产品设计优化分析</title>
+    <link rel="icon" href="../static/logo.jpg">
     <style>
         body {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             font-family: Arial, sans-serif;
             background-color: #f7f7f7;
         }
         
         .container {
-            width: 600px;
+            max-width: 800px;
             padding: 40px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: auto;
         }
         
         h1 {
@@ -36,39 +37,136 @@
         textarea {
             width: 100%;
             resize: vertical;
-            padding: 5px;
-            font-family: monospace;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
         }
         
         .result {
             background-color: #f5f5f5;
             padding: 10px;
             border-radius: 5px;
-            overflow-y: scroll;
-            max-height: 200px;
             font-family: monospace;
             white-space: pre-wrap;
             word-break: break-all;
         }
+        
+        .export-button {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .logo {
+            max-width: 20%;
+            max-height: 20%;
+        }
+        
+        .submit-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .submit-button:hover {
+            background-color: #555;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            flex: 1;
+            /* Other container styles... */
+        }
+        
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        .footer-info {
+            margin-bottom: 10px;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script>
+        function renderMarkdown(text) {
+            var converter = new showdown.Converter();
+            var html = converter.makeHtml(text);
+            return html;
+        }
+        
+        function showLoading() {
+            var loading = document.getElementById("loading");
+            loading.style.display = "block";
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            var markdownText = {{ results|tojson }};
+            var markdownResult = document.getElementById("markdownResult");
+            markdownResult.innerHTML = renderMarkdown(markdownText);
+        });
+        
+        function downloadAsPNG() {
+            var container = document.getElementById("container");
+            var result = document.getElementById("markdownResult");
+            var options = {
+                scrollY: -window.scrollY, // 考虑滚动位置
+                windowWidth: container.offsetWidth,
+                windowHeight: result.offsetHeight + 20 // 考虑额外的空白
+            };
+            html2canvas(container, options).then(function(canvas) {
+                canvas.toBlob(function(blob) {
+                    saveAs(blob, "result.png");
+                });
+            });
+        }
+    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Link Crawler</h1>
-        <form method="POST">
+    <div class="container" id="container">
+        <div class="header">
+            <img src="../static/logo.jpg" alt="Logo" class="logo">
+            <h1>文锋产品设计优化分析</h1>
+        </div>
+        <form method="POST" onsubmit="showLoading()">
             {{ form.hidden_tag() }}
             <p>
                 {{ form.url.label }}<br>
-                <textarea name="url" rows="10" cols="50">{{ form.url.data }}</textarea>
+                <textarea id="url" name="url" rows="10" cols="50" placeholder="输入产品链接：">{{ form.url.data or '' }}</textarea>
             </p>
-            <p>{{ form.submit() }}</p>
+            <p><button class="submit-button" type="submit">确认</button></p>
         </form>
-        {% if reviews %}
-            <h2>Results</h2>
-            <div class="result">
-                {{ reviews }}
+        <div id="loading" style="display: none;">AI商务分析师，正在分析中，请稍后~~~</div>
+        {% if results %}
+            <div class="result" id="markdownResult"></div>
+            <div style="text-align: center;">
+                <button onclick="downloadAsPNG()">保存为图片</button>
             </div>
         {% endif %}
+
     </div>
+    <footer>
+        <div class="footer-info">
+            <p>© 2023 文锋产品设计优化分析. All rights reserved.</p>
+            <p>联系方式: zhuhao@silicocobaby.com</p>
+        </div>
+    </footer>
 </body>
 </html>

@@ -4,15 +4,18 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import requests
 import openai
+from flask import Flask, request, send_file
+from io import BytesIO
+import pdfkit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = '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'  # change this to your OpenAI API key
+openai.api_key = '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'  # change this to your OpenAI API key
 
 
 class URLForm(FlaskForm):
-    url = StringField('URLs', validators=[DataRequired()])
-    submit = SubmitField('Submit')
+    url = StringField('', validators=[DataRequired()])
+    submit = SubmitField('确认')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -37,16 +40,13 @@ def index():
         reviews_text = '\n'.join(reviews)
 
         # 使用 OpenAI ChatGPT 处理评论文本
-        response = openai.Completion.create(
-            engine='gpt-3.5-turbo',
-            prompt=reviews_text,
-            max_tokens=1000,
-            n=5,
-            stop=None,
-            temperature=0.5
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论、h2结论与建议；产品信息及评论如下："},
+                      {"role": "user", "content": reviews_text}]
         )
 
-        results = [choice['text'].strip() for choice in response['choices']]
+        results = response['choices'][0]['message']['content']
 
     return render_template('index.html', form=form, results=results)
 
