@@ -5,6 +5,7 @@
     <title>文锋产品设计优化分析</title>
     <link rel="icon" href="../static/logo.jpg">
     <style>
+        /* CSS styles... */
         body {
             display: flex;
             align-items: center;
@@ -78,6 +79,25 @@
         .submit-button:hover {
             background-color: #555;
         }
+        
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            color: #fff;
+        }
+        
         body {
             display: flex;
             flex-direction: column;
@@ -113,14 +133,22 @@
         }
         
         function showLoading() {
-            var loading = document.getElementById("loading");
-            loading.style.display = "block";
+            var loadingOverlay = document.createElement("div");
+            loadingOverlay.className = "loading-overlay";
+            loadingOverlay.innerHTML = '<p class="loading-text">AI商务分析师，正在分析中，请稍后~~~</p>';
+            document.body.appendChild(loadingOverlay);
         }
         
         document.addEventListener("DOMContentLoaded", function() {
             var markdownText = {{ results|tojson }};
             var markdownResult = document.getElementById("markdownResult");
             markdownResult.innerHTML = renderMarkdown(markdownText);
+            
+            // Remove loading overlay after DOM is loaded
+            var loadingOverlay = document.querySelector(".loading-overlay");
+            if (loadingOverlay) {
+                loadingOverlay.remove();
+            }
         });
         
         function downloadAsPNG() {
@@ -160,7 +188,6 @@
                 <button onclick="downloadAsPNG()">保存为图片</button>
             </div>
         {% endif %}
-
     </div>
     <footer>
         <div class="footer-info">

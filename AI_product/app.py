@@ -10,7 +10,7 @@ import pdfkit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = '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'  # change this to your OpenAI API key
+openai.api_key = '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'  # change this to your OpenAI API key
 
 
 class URLForm(FlaskForm):
