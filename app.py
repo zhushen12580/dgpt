@@ -7,7 +7,7 @@ import openai
 from flask import Flask, request, send_file
 from io import BytesIO
 import pdfkit
-
+import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
 openai.api_key = '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'  # change this to your OpenAI API key
