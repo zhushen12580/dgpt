@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -20,13 +20,16 @@ class URLForm(FlaskForm):
     url = StringField('', validators=[DataRequired()])
     submit = SubmitField('确认')
 
+@app.route('/')
+def welcome():
+    return render_template('welcome.html')  # The welcome.html is your new welcome page
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def index():
     form = URLForm()
     results = None
     if form.validate_on_submit():
-        urls = form.url.data.splitlines()
+        urls = form.url.data.splitlines()#
         reviews = []
         for url in urls:
             params = {
