@@ -28,46 +28,42 @@ def build_review_url(asin, page_number):
     """
     return f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
 
-def get_reviews(url):
-    """
-    发送请求获取产品评论
-    """
+def get_reviews(asin, page_number):
+    """发送请求获取产品评论"""
     reviews = []
+    review_url = build_review_url(asin, page_number)
     params = {
         'token': token,
         'scraper': 'amazon-product-reviews',
         'format': 'json',
-        'url': url,
+        'url': review_url,
     }
     response = requests.get('https://api.crawlbase.com/', params=params)
-    #解析json数据
+    # 解析json数据
     data = response.json()
     if 'body' in data and 'reviews' in data['body']:
         reviews.extend(item['reviewText'] for item in data['body']['reviews'])
     
-    next = data['body']['pagination']['nextPage']
-    return reviews,next
+    next = data['body']['pagination']['nextPage'] if 'pagination' in data['body'] and 'nextPage' in data['body']['pagination'] else None
+    return reviews, next
 
 def get_all_reviews(url):
-    """
-    递归获取所有产品评论
-    """
+    """递归获取所有产品评论"""
     reviews = []
+    asin = extract_asin(url)
     page_number = 1
     while True:
-        review_url = build_review_url(url, page_number)
-        page_reviews,next_page = get_reviews(review_url)
+        page_reviews, next_page = get_reviews(asin, page_number)
         if len(page_reviews) == 0:
             break
         reviews.extend(page_reviews)
         
         # 检查是否有下一页
-        if next_page == "null":
+        if not next_page:
             break
             
         page_number += 1
     return reviews
-
 
 class URLForm(FlaskForm):
     url = StringField('', validators=[DataRequired()])
@@ -86,8 +82,7 @@ def index():
         urls = form.url.data.splitlines()#
         reviews = []
         for url in urls:
-            asin = extract_asin(url)
-            reviews.extend(get_all_reviews(asin))
+            reviews.extend(get_all_reviews(url))
         
         # 处理评论文本，调用 OpenAI ChatGPT 进行分析处理
         reviews_text = '\n'.join(reviews)
