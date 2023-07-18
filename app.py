@@ -9,11 +9,63 @@ from io import BytesIO
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-#openai.api_key = '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'  # change this to your OpenAI API key
-# 从环境变量中获取 OpenAI API 密钥
 openai.api_key = os.getenv('KEY')
 token = os.getenv('TOKEN')
+
+def extract_asin(url):
+    """
+    从产品链接中提取 ASIN 号
+    """
+    asin_start_index = url.find('/dp/') + 4
+    asin_end_index = url.find('/', asin_start_index)
+    asin = url[asin_start_index:asin_end_index]
+    return asin
+
+def build_review_url(asin, page_number):
+    """
+    根据 ASIN 号和页码构建产品评论链接
+    """
+    return f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
+
+def get_reviews(url):
+    """
+    发送请求获取产品评论
+    """
+    reviews = []
+    params = {
+        'token': token,
+        'scraper': 'amazon-product-reviews',
+        'format': 'json',
+        'url': url,
+    }
+    response = requests.get('https://api.crawlbase.com/', params=params)
+    #解析json数据
+    data = response.json()
+    if 'body' in data and 'reviews' in data['body']:
+        reviews.extend(item['reviewText'] for item in data['body']['reviews'])
+    
+    next = data['body']['pagination']['nextPage']
+    return reviews,next
+
+def get_all_reviews(url):
+    """
+    递归获取所有产品评论
+    """
+    reviews = []
+    page_number = 1
+    while True:
+        review_url = build_review_url(url, page_number)
+        page_reviews,next_page = get_reviews(review_url)
+        if len(page_reviews) == 0:
+            break
+        reviews.extend(page_reviews)
+        
+        # 检查是否有下一页
+        if next_page == "null":
+            break
+            
+        page_number += 1
+    return reviews
 
 
 class URLForm(FlaskForm):
@@ -24,6 +76,7 @@ class URLForm(FlaskForm):
 def welcome():
     return render_template('welcome.html')  # The welcome.html is your new welcome page
 
+
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     form = URLForm()
@@ -32,17 +85,10 @@ def index():
         urls = form.url.data.splitlines()#
         reviews = []
         for url in urls:
-            params = {
-                'token': token,
-                'scraper': 'amazon-product-reviews',
-                'format': 'json',
-                'url': url,
-            }
-            response = requests.get('https://api.crawlbase.com/', params=params)
-            data = response.json()
-            if 'body' in data and 'reviews' in data['body']:
-                reviews.extend(item['reviewText'] for item in data['body']['reviews'])
-
+            asin = extract_asin(url)
+            reviews.extend(get_all_reviews(asin))
+        
+        # 处理评论文本，调用 OpenAI ChatGPT 进行分析处理
         reviews_text = '\n'.join(reviews)
 
         # 使用 OpenAI ChatGPT 处理评论文本
@@ -53,9 +99,7 @@ def index():
         )
 
         results = response['choices'][0]['message']['content']
-
     return render_template('index.html', form=form, results=results)
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
