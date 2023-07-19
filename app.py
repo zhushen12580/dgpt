@@ -36,7 +36,7 @@ def index():
             asin = url[asin_start_index:asin_end_index]
             page_number = 1
             
-            while page_number<6:
+            while page_number<9:
                 url_detail = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
                 params = {
                     'token': token,
@@ -47,7 +47,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'])
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
                 if data['body']['pagination']['nextPage']=='null':
                     break
                 page_number += 1
