@@ -36,7 +36,7 @@ def index():
             asin = url[asin_start_index:asin_end_index]
             page_number = 1
             
-            while page_number<9:
+            while page_number<8:
                 url_detail = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
                 params = {
                     'token': token,
