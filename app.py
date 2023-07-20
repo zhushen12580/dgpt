@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
@@ -10,9 +11,10 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = os.getenv('KEY')
-token = os.getenv('TOKEN')
-
+# openai.api_key = os.getenv('KEY')
+# token = os.getenv('TOKEN')
+openai.api_key = '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'
+token = 'WyAsI2Zt0_tDshEfS95ccg'
 
 
 class URLForm(FlaskForm):
@@ -27,6 +29,7 @@ def welcome():
 def index():
     form = URLForm()
     results = None
+    product_review_top = []
     if form.validate_on_submit():
         urls = form.url.data.splitlines()#
         reviews = []
@@ -36,7 +39,7 @@ def index():
             asin = url[asin_start_index:asin_end_index]
             page_number = 1
             
-            while page_number<8:
+            while page_number<9:
                 url_detail = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
                 params = {
                     'token': token,
@@ -50,6 +53,8 @@ def index():
                     reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
                 if data['body']['pagination']['nextPage']=='null':
                     break
+                if 'body' in data and 'productReviewTop' in data['body']:
+                    product_review_top = data['body']['productReviewTop']
                 page_number += 1
 
         reviews_text = '\n'.join(reviews)
@@ -63,7 +68,7 @@ def index():
 
         results = response['choices'][0]['message']['content']
 
-    return render_template('index.html', form=form, results=results)
+    return render_template('index.html', form=form, results=results,stars=product_review_top)
 
 
 if __name__ == '__main__':

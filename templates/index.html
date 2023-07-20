@@ -6,6 +6,15 @@
     <link rel="icon" href="../static/logo.jpg">
     <style>
         /* CSS styles... */
+        /* The same as before, just adding the style for the title blink */
+        @keyframes blink {
+            0% {color: #000;}
+            50% {color: transparent;}
+            100% {color: #000;}
+        }
+        .blink {
+            animation: blink 1s linear infinite;
+        }
         body {
             display: flex;
             align-items: center;
@@ -157,17 +166,123 @@
             max-width: 500px;
             text-align: center;
         }
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: nowrap;
+            height: 400px;  /* Set a specific height for the container */
+        }
+
+        #pieChart, #lineChart {
+            max-width: 45%;  /* Set maximum width to control the size of charts */
+            max-height: 100%;  /* Allow the chart to use the full height of the container */
+            height: 100%;  /* Set the height of the charts */
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+        requestNotificationPermission();
+        // Add this function to handle title blinking
+        function blinkTitle(message, blinkDelay) {
+                    var oldTitle = document.title;
+                    var timeoutId;
+                    var blink = function() { document.title = document.title == message ? ' ' : message; };
+                    var clear = function() {
+                        clearInterval(timeoutId);
+                        document.title = oldTitle;
+                        window.onmousemove = null;
+                        timeoutId = null;
+                    };
+                    if (!timeoutId) {
+                        timeoutId = setInterval(blink, blinkDelay);
+                        window.onmousemove = clear;
+                    }
+                }
+        // Call blinkTitle function when analysis is complete
+        function showAnalysisComplete() {
+            var modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="blink">分析完成</h2>
+                    <p>分析已经完成，结果已经生成在下方。</p>
+                    <button onclick="closeModal()" class="submit-button">好的</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            blinkTitle("分析完成", 1000);
+            // 新增：发送通知
+            if (Notification.permission === "granted") {
+                new Notification("分析完成", {
+                    body: "分析已经完成，结果已经生成在下方。",
+                    icon: "../static/logo.jpg"  // 可选的通知图标
+                });
+            }
+        }
+        function createPieChart(data) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            const labels = data.map(obj => Object.keys(obj)[0]);
+            const dataset = data.map(obj => parseInt(Object.values(obj)[0]));
+            const colors = ['#7D848E', '#8491A3', '#899DA4', '#91AAB1', '#94B7BB'];
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataset,
+                        backgroundColor: colors
+                    }]
+                }
+            });
+        }
         function renderMarkdown(text) {
             var converter = new showdown.Converter();
             var html = converter.makeHtml(text);
             return html;
         }
-        
+
+        function createLineChart(data) {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            const labels = data.map(obj => Object.keys(obj)[0]);
+            const dataset = data.map(obj => parseInt(Object.values(obj)[0]));
+            const colors = ['#7D848E', '#8491A3', '#899DA4', '#91AAB1', '#94B7BB'];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '估计销量',
+                        data: dataset,
+                        backgroundColor: 'transparent',
+                        borderColor: colors[0],
+                        pointBackgroundColor: colors,
+                        borderWidth: 2,
+                        lineTension: 0.5
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
         function showLoading() {
             var loadingOverlay = document.createElement("div");
             loadingOverlay.className = "loading-overlay";
@@ -201,18 +316,18 @@
                 });
             });
         }
-        function showAnalysisComplete() {
-            var modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2>分析完成</h2>
-                    <p>分析已经完成，结果已经生成在下方。</p>
-                    <button onclick="closeModal()" class="submit-button">好的</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
+        // function showAnalysisComplete() {
+        //     var modal = document.createElement('div');
+        //     modal.className = 'modal';
+        //     modal.innerHTML = `
+        //         <div class="modal-content">
+        //             <h2>分析完成</h2>
+        //             <p>分析已经完成，结果已经生成在下方。</p>
+        //             <button onclick="closeModal()" class="submit-button">好的</button>
+        //         </div>
+        //     `;
+        //     document.body.appendChild(modal);
+        // }
 
         function closeModal() {
             var modal = document.querySelector('.modal');
@@ -222,6 +337,9 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
+            const data = [{"5star": "68%"}, {"4star": "14%"}, {"3star": "9%"}, {"2star": "4%"}, {"1star": "5%"}];
+            createPieChart(data);
+            createLineChart(data);
             var markdownText = {{ results|tojson }};
             var markdownResult = document.getElementById("markdownResult");
             markdownResult.innerHTML = renderMarkdown(markdownText);
@@ -255,6 +373,10 @@
         </form>
         <div id="loading" style="display: none;">AI商务分析师，正在分析中，请稍后~~~</div>
         {% if results %}
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+                <canvas id="lineChart"></canvas>
+            </div>
             <div class="result" id="markdownResult"></div>
             <div style="text-align: center;">
                 <button class="save-button" onclick="downloadAsPNG()">保存为图片</button>
