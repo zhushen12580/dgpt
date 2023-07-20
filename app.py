@@ -11,10 +11,9 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-# openai.api_key = os.getenv('KEY')
-# token = os.getenv('TOKEN')
-openai.api_key = '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'
-token = 'WyAsI2Zt0_tDshEfS95ccg'
+openai.api_key = os.getenv('KEY')
+token = os.getenv('TOKEN')
+
 
 
 class URLForm(FlaskForm):
