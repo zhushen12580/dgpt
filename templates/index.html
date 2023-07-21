@@ -24,7 +24,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1000px;
             padding: 40px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -224,8 +224,8 @@
             blinkTitle("分析完成", 1000);
             // 新增：发送通知
             if (Notification.permission === "granted") {
-                new Notification("分析完成", {
-                    body: "分析已经完成，结果已经生成在下方。",
+                new Notification("AI分析完成", {
+                    body: "分析已经完成🎉🎉，请返回页面查看报告。💃",
                     icon: "../static/logo.jpg"  // 可选的通知图标
                 });
             }
@@ -338,6 +338,7 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             const data = [{"5star": "68%"}, {"4star": "14%"}, {"3star": "9%"}, {"2star": "4%"}, {"1star": "5%"}];
+            // print({{ stars }})
             createPieChart(data);
             createLineChart(data);
             var markdownText = {{ results|tojson }};

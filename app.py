@@ -11,9 +11,10 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = os.getenv('KEY')
-token = os.getenv('TOKEN')
-
+# openai.api_key = os.getenv('KEY')
+# token = os.getenv('TOKEN')
+openai.api_key = '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'
+token = 'WyAsI2Zt0_tDshEfS95ccg'
 
 
 class URLForm(FlaskForm):
@@ -36,25 +37,81 @@ def index():
             asin_start_index = url.find('/dp/') + 4
             asin_end_index = url.find('/', asin_start_index)
             asin = url[asin_start_index:asin_end_index]
-            page_number = 1
-            
-            while page_number<9:
-                url_detail = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
+
+            #url_detail = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page_number}?ie=UTF8&reviewerType=all_reviews&pageNumber={page_number}"
+
+            try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=one_star&pageNumber=1"
                 params = {
                     'token': token,
                     'scraper': 'amazon-product-reviews',
                     'format': 'json',
-                    'url': url_detail,
+                    'url': url_detail1,
                 }
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
                     reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
-                if data['body']['pagination']['nextPage']=='null':
-                    break
-                if 'body' in data and 'productReviewTop' in data['body']:
-                    product_review_top = data['body']['productReviewTop']
-                page_number += 1
+            except:
+                continue
+            try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=two_star&pageNumber=1"
+                params = {
+                    'token': token,
+                    'scraper': 'amazon-product-reviews',
+                    'format': 'json',
+                    'url': url_detail1,
+                }
+                response = requests.get('https://api.crawlbase.com/', params=params)
+                data = response.json()
+                if 'body' in data and 'reviews' in data['body']:
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+            except:
+                continue
+            try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=three_star&pageNumber=1"
+                params = {
+                    'token': token,
+                    'scraper': 'amazon-product-reviews',
+                    'format': 'json',
+                    'url': url_detail1,
+                }
+                response = requests.get('https://api.crawlbase.com/', params=params)
+                data = response.json()
+                if 'body' in data and 'reviews' in data['body']:
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+            except:
+                continue
+            try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=1"
+                params = {
+                    'token': token,
+                    'scraper': 'amazon-product-reviews',
+                    'format': 'json',
+                    'url': url_detail1,
+                }
+                response = requests.get('https://api.crawlbase.com/', params=params)
+                data = response.json()
+                if 'body' in data and 'reviews' in data['body']:
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                if data['body']['pagination']['nextPage']!='null':
+                    url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=2"
+                    params = {
+                        'token': token,
+                        'scraper': 'amazon-product-reviews',
+                        'format': 'json',
+                        'url': url_detail1,
+                    }
+                    response = requests.get('https://api.crawlbase.com/', params=params)
+                    data = response.json()
+                    if 'body' in data and 'reviews' in data['body']:
+                        reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+            except:
+                continue
+
+            if 'body' in data and 'productReviewTop' in data['body']:
+                product_review_top = data['body']['productReviewTop']
+                print(product_review_top)
 
         reviews_text = '\n'.join(reviews)
 
