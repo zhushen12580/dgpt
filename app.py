@@ -54,6 +54,21 @@ def index():
             except:
                 continue
             try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=five_star&pageNumber=1"
+                params = {
+                    'token': token,
+                    'scraper': 'amazon-product-reviews',
+                    'format': 'json',
+                    'url': url_detail1,
+                }
+                response = requests.get('https://api.crawlbase.com/', params=params)
+                data = response.json()
+                if 'body' in data and 'reviews' in data['body']:
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+            except:
+                continue
+                
+            try:
                 url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=two_star&pageNumber=1"
                 params = {
                     'token': token,
@@ -93,18 +108,6 @@ def index():
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
                     reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
-                if data['body']['pagination']['nextPage']!='null':
-                    url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=2"
-                    params = {
-                        'token': token,
-                        'scraper': 'amazon-product-reviews',
-                        'format': 'json',
-                        'url': url_detail1,
-                    }
-                    response = requests.get('https://api.crawlbase.com/', params=params)
-                    data = response.json()
-                    if 'body' in data and 'reviews' in data['body']:
-                        reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
             except:
                 continue
 
