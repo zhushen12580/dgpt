@@ -128,7 +128,7 @@ def index():
         data = {
             "model": "gpt-4",
             "messages": [{"role": "user", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text}],
-            "disable_history": False,
+            "disable_history": True,
         }
         print(reviews_text)
         response = requests.post(url, json=data, headers=headers,timeout=800)
