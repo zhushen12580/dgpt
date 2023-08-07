@@ -16,7 +16,6 @@ openai.api_key = os.getenv('KEY')
 token = os.getenv('TOKEN')
 
 
-
 class URLForm(FlaskForm):
     url = StringField('', validators=[DataRequired()])
     submit = SubmitField('确认')
@@ -51,7 +50,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36 & len(item['reviewText'])<1200)
             except:
                 continue
             try:
@@ -65,7 +64,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36 & len(item['reviewText'])<1200)
             except:
                 continue
                 
@@ -80,7 +79,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36 & len(item['reviewText'])<1200)
             except:
                 continue
             try:
@@ -94,7 +93,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36 & len(item['reviewText'])<1200)
             except:
                 continue
             try:
@@ -108,7 +107,7 @@ def index():
                 response = requests.get('https://api.crawlbase.com/', params=params)
                 data = response.json()
                 if 'body' in data and 'reviews' in data['body']:
-                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36)
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if len(item['reviewText']) > 36 & len(item['reviewText'])<1200)
             except:
                 continue
 
