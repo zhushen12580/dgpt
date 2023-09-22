@@ -119,7 +119,7 @@ def index():
         reviews_text = '\n'.join(reviews)
 
 
-        url = "url = "http://120.79.81.153/api/conversation/talk""
+        url = "http://120.79.81.153/api/conversation/talk""
 
         headers = {
             "Content-Type": "application/json",
