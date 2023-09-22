@@ -134,7 +134,7 @@ def index():
             "stream":False
         }
         print(reviews_text)
-        if len(reviews_text)<10000:
+        if len(reviews_text)<20000:
             response = requests.post(url, headers=headers, json=data,timeout=3000)
             if response.status_code == 200:
                 result = response.json()
