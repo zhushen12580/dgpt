@@ -1,7 +1,8 @@
 Flask==2.3.2
-Flask_WTF==1.1.1
+Flask_WTF==1.2.1
 openai==0.27.8
 pdfkit==1.0.0
 Requests==2.31.0
 WTForms==3.0.1
 tiktoken
+Werkzeug==3.0.0
