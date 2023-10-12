@@ -5,4 +5,3 @@ pdfkit==1.0.0
 Requests==2.31.0
 WTForms==3.0.1
 tiktoken
-werkzeug==0.16.1
