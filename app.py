@@ -14,7 +14,7 @@ import uuid
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
 openai.api_key = os.getenv('KEY')
-openai.api_base = "https://api.aigc369.com/v1"
+openai.api_base = "https://gpt666.eu.org/v1"
 token = os.getenv('TOKEN')
 
 
