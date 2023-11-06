@@ -10,12 +10,13 @@ from io import BytesIO
 import os
 import requests
 import uuid
+import http.client
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = os.getenv('KEY')
-openai.api_base = "https://gpt666.eu.org/v1"
-token = os.getenv('TOKEN')
+openai.api_key = "Link_mVKxpG4opGPGHib2qcdxNiin0xXJGlVWasnLfPm4j9" #os.getenv('KEY')
+openai.api_base = "https://api.link-ai.chat/v1"
+token = "WyAsI2Zt0_tDshEfS95ccg" #os.getenv('TOKEN')#Link_mVKxpG4opGPGHib2qcdxNiin0xXJGlVWasnLfPm4j9
 
 
 class URLForm(FlaskForm):
@@ -25,6 +26,9 @@ class URLForm(FlaskForm):
 @app.route('/')
 def welcome():
     return render_template('welcome.html')  # The welcome.html is your new welcome page
+
+def trim_string_to_length(s, max_length=20000):
+    return s[:max_length] if len(s) > max_length else s
 
 @app.route('/index', methods=['GET', 'POST'])
 def index():
@@ -113,20 +117,20 @@ def index():
                     reviews.extend(item['reviewText'] for item in data['body']['reviews'] if (len(item['reviewText']) > 36 & len(item['reviewText'])<800))
             except:
                 continue
-            # try:
-            #     url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=2"
-            #     params = {
-            #         'token': token,
-            #         'scraper': 'amazon-product-reviews',
-            #         'format': 'json',
-            #         'url': url_detail1,
-            #     }
-            #     response = requests.get('https://api.crawlbase.com/', params=params)
-            #     data = response.json()
-            #     if 'body' in data and 'reviews' in data['body']:
-            #         reviews.extend(item['reviewText'] for item in data['body']['reviews'] if (len(item['reviewText']) > 36 & len(item['reviewText'])<800))
-            # except:
-            #     continue
+            try:
+                url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=2"
+                params = {
+                    'token': token,
+                    'scraper': 'amazon-product-reviews',
+                    'format': 'json',
+                    'url': url_detail1,
+                }
+                response = requests.get('https://api.crawlbase.com/', params=params)
+                data = response.json()
+                if 'body' in data and 'reviews' in data['body']:
+                    reviews.extend(item['reviewText'] for item in data['body']['reviews'] if (len(item['reviewText']) > 36 & len(item['reviewText'])<800))
+            except:
+                continue
 
             if 'body' in data and 'productReviewTop' in data['body']:
                 product_review_top = data['body']['productReviewTop']
@@ -148,22 +152,17 @@ def index():
             "parent_message_id": str(uuid.uuid4()),  # 首次请求时生成新的UUID，之后可根据需要更新
             "stream":False
         }
-        print(reviews_text)
-
-        if len(reviews_text)<20000:
+        reviews_text = trim_string_to_length(reviews_text)
+        try:
             response = requests.post(url, headers=headers, json=data,timeout=3000)
-            if response.status_code == 200:
-                result = response.json()
-                results =  response.json()['message']['content']['parts'][0]
-                print(result)
-            else:
-                print("请求失败:", response.status_code, response.text)
-        else:
+            result = response.json()
+            results =  response.json()['message']['content']['parts'][0]
+            print(result)
+        except:
             chat_completion = openai.ChatCompletion.create(
-            model="gpt-4-32k", messages=[{"role": "user", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text}],timeout=3200.0)
+            model="gpt-4", messages=[{"role": "user", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text}],timeout=3200.0)
             results = chat_completion.choices[0]['message']['content']
             print(results)
-
     return render_template('index.html', form=form, results=results,stars=product_review_top)
 
 
