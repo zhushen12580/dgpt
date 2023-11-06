@@ -14,9 +14,9 @@ import http.client
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = "Link_mVKxpG4opGPGHib2qcdxNiin0xXJGlVWasnLfPm4j9" #os.getenv('KEY')
+openai.api_key = os.getenv('KEY')
 openai.api_base = "https://api.link-ai.chat/v1"
-token = "WyAsI2Zt0_tDshEfS95ccg" #os.getenv('TOKEN')#Link_mVKxpG4opGPGHib2qcdxNiin0xXJGlVWasnLfPm4j9
+token = os.getenv('TOKEN')
 
 
 class URLForm(FlaskForm):
