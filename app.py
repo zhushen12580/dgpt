@@ -17,9 +17,9 @@ from requests.packages.urllib3.util.retry import Retry
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'  # change this to your secret key
-openai.api_key = os.getenv('KEY')
+openai.api_key = "Link_tYOZdFTnf0RDsOkryM5gk8lrUkwIBLZDFirsZko8XH"  #os.getenv('KEY')
 openai.api_base = "https://api.link-ai.chat/v1"
-token = os.getenv('TOKEN')
+token = "JovDoRgsAoqZ6JlT2g_eUw"#os.getenv('TOKEN')
 
 
 class URLForm(FlaskForm):
