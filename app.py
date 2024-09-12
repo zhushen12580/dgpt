@@ -151,7 +151,6 @@ def index():
                 print(product_review_top)
 
         reviews_text = '\n'.join(reviews)
-        print(f"Error in API call: {e}")
         try:
             chat_completion = openai.ChatCompletion.create(
                 model="gpt-4", 
