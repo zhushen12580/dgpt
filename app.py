@@ -144,60 +144,25 @@ def index():
             except Exception as e:
                 print(f"Error fetching reviews: {e}")
                 continue
-            # try:
-            #     url_detail1 = f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_unknown?ie=UTF8&reviewerType=all_reviews&filterByStar=four_star&pageNumber=2"
-            #     params = {
-            #         'token': token,
-            #         'scraper': 'amazon-product-reviews',
-            #         'format': 'json',
-            #         'url': url_detail1,
-            #     }
-            #     response = requests.get('https://api.crawlbase.com/', params=params)
-            #     data = response.json()
-            #     if 'body' in data and 'reviews' in data['body']:
-            #         reviews.extend(item['reviewText'] for item in data['body']['reviews'] if (len(item['reviewText']) > 36 & len(item['reviewText'])<800))
-            # except:
-            #     continue
+
 
             if 'body' in data and 'productReviewTop' in data['body']:
                 product_review_top = data['body']['productReviewTop']
                 print(product_review_top)
 
         reviews_text = '\n'.join(reviews)
-
-
-        url = "http://120.79.81.153/api/conversation/talk"
-
-        headers = {
-            "Content-Type": "application/json",
-        }
-
-        data = {
-            "prompt": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text,
-            "model": "gpt-4-plugins",
-            "message_id": str(uuid.uuid4()),  # 自动生成UUID
-            "parent_message_id": str(uuid.uuid4()),  # 首次请求时生成新的UUID，之后可根据需要更新
-            "stream":False
-        }
-        reviews_text = trim_string_to_length(reviews_text)
+        print(f"Error in API call: {e}")
         try:
-            response = requests_retry_session().post(url, headers=headers, json=data, timeout=6600)
-            result = response.json()
-            results =  response.json()['message']['content']['parts'][0]
-            print(result)
+            chat_completion = openai.ChatCompletion.create(
+                model="gpt-4", 
+                messages=[{"role": "user", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text}],
+                timeout=6600.0
+            )
+            results = chat_completion.choices[0]['message']['content']
+            print(results)
         except Exception as e:
-            print(f"Error in API call: {e}")
-            try:
-                chat_completion = openai.ChatCompletion.create(
-                    model="gpt-4", 
-                    messages=[{"role": "user", "content": "作为nlp算法模型，分析以下产品信息及评论，找出该产品的用户需求点，格式要求：以分析报告的格式输出且是markdown格式的，层次清晰，重点突出，包含h1标题（产品设计优化方向分析报告）、小字体产品名（简称）、h2摘要、h2主要发现（每条发现标题加粗），主要发现下面增加一条引用的评论,并指出有多少条相似观点、h2结论与建议；产品信息及评论如下：产品信息："+reviews_text}],
-                    timeout=6600.0
-                )
-                results = chat_completion.choices[0]['message']['content']
-                print(results)
-            except Exception as e:
-                print(f"Error in OpenAI API call: {e}")
-                results = "An error occurred while processing your request. Please try again later."
+            print(f"Error in OpenAI API call: {e}")
+            results = "An error occurred while processing your request. Please try again later."
 
     return render_template('index.html', form=form, results=results,stars=product_review_top)
 
